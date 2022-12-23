@@ -8,6 +8,7 @@
     <Authors>Ubiq Analytics</Authors>
     <PackageProjectUrl>https://github.com/ubiqanalytics/Ubiq.SportX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ubiqanalytics/Ubiq.SportX</RepositoryUrl>
+    <Description>A .NET wrapper library for the SX BET exchange API</Description>
   </PropertyGroup>
 
   <ItemGroup>
