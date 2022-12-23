@@ -51,9 +51,6 @@ namespace Ubiq.SportXAPI
         public event EventHandler<TradeUpdateMessage> TradeUpdated;
         public event EventHandler<TradeUpdateMessage> MyTradeUpdated;
 
-        private Timer m_ProcessedTradesCleaner;
-        private Dictionary<string, DateTime> m_MyProcessedTrades = new Dictionary<string, DateTime>();
-
         public SportXAPI(ILogger<SportXAPI> logger, IHttpClientHelper httpClientExtensions, HttpClient httpClient, Uri baseUri, string privateKey, decimal makerCommissionRate, decimal takerCommissionRate, string apiKey)
         {
             m_Logger = logger;
@@ -125,8 +122,6 @@ namespace Ubiq.SportXAPI
                 }
             });
             ably.Connect();
-
-            m_ProcessedTradesCleaner = new Timer(_CleanProcessedTrades, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
         }
 
         private void _CreateChannel(AblyRealtime ably, string channelName, Action<Message> handler)
@@ -208,38 +203,11 @@ namespace Ubiq.SportXAPI
             {
                 // blank out bettor for our trades
                 tradeUpdateMessage.bettor = null;
-
-                // sometimes identical messages come through with the same Id, filter them
-                bool invoke = false;
-                lock (m_MyProcessedTrades)
-                {
-                    if (m_MyProcessedTrades.ContainsKey(tradeUpdateMessage.id) == false)
-                    {
-                        invoke = true;
-                        m_MyProcessedTrades[tradeUpdateMessage.id] = DateTime.UtcNow;
-                    }
-                }
-
-                if (invoke == true)
-                {
-                    MyTradeUpdated?.Invoke(this, tradeUpdateMessage);
-                }
+                MyTradeUpdated?.Invoke(this, tradeUpdateMessage);
             }
             else
             {
                 TradeUpdated?.Invoke(this, tradeUpdateMessage);
-            }
-        }
-
-        private void _CleanProcessedTrades(object state)
-        {
-            lock (m_MyProcessedTrades)
-            {
-                IEnumerable<KeyValuePair<string, DateTime>> oldValues = m_MyProcessedTrades.Where(t => (DateTime.UtcNow - t.Value) > TimeSpan.FromMinutes(5));
-                foreach (var oldValue in oldValues)
-                {
-                    m_MyProcessedTrades.Remove(oldValue.Key);
-                }
             }
         }
 
