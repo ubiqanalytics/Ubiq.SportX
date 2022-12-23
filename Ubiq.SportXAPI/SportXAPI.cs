@@ -85,18 +85,14 @@ namespace Ubiq.SportXAPI
 
             m_ExecutorAddress = meta.data.executorAddress;
 
-            m_USDCBaseTokenAddress = meta.data.addresses.C416?.USDC; // ?? meta.data.addresses.C80001?.USDC;
-            m_ETHBaseTokenAddress = meta.data.addresses.C416?.WETH; // ?? meta.data.addresses.C80001?.WETH;
-            m_SXBaseTokenAddress = meta.data.addresses.C416?.WSX; // ?? meta.data.addresses.C80001?.WETH;
+            m_USDCBaseTokenAddress = meta.data.addresses.C416?.USDC;
+            m_ETHBaseTokenAddress = meta.data.addresses.C416?.WETH;
+            m_SXBaseTokenAddress = meta.data.addresses.C416?.WSX;
 
             if (meta.data.addresses.C416 is object)
             {
                 m_ChainId = 416;
             }
-            //else if (meta.data.addresses.C80001 is object)
-            //{
-            //    m_ChainId = 80001;
-            //}
 
             return meta;
         }
@@ -217,7 +213,7 @@ namespace Ubiq.SportXAPI
                 bool invoke = false;
                 lock (m_MyProcessedTrades)
                 {
-                    if (m_MyProcessedTrades.TryGetValue(tradeUpdateMessage.id, out DateTime timestamp) == false)
+                    if (m_MyProcessedTrades.ContainsKey(tradeUpdateMessage.id) == false)
                     {
                         invoke = true;
                         m_MyProcessedTrades[tradeUpdateMessage.id] = DateTime.UtcNow;
