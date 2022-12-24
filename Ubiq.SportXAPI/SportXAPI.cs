@@ -3,8 +3,10 @@ using IO.Ably.Realtime;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.Logging;
 using Nethereum.ABI;
+using Nethereum.ABI.EIP712;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
+using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Numerics;
@@ -582,14 +584,19 @@ namespace Ubiq.SportXAPI
                 return CancelOrdersV2Response.Success();
             }
 
+            byte[] salt = RandomNumberGenerator.GetBytes(32).Concat(_Zero).ToArray();
+
             string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/v2";
             var cancelOrdersRequest = new CancelOrdersV2Request
             {
                 orderHashes = orderHashes.ToArray(),
                 maker = m_WalletAddress,
-                salt = new BigInteger(RandomNumberGenerator.GetBytes(32).Concat(_Zero).ToArray()).ToString(),
+                salt = new BigInteger(salt).ToString(),
                 timestamp = DateTimeOffset.UtcNow.AddSeconds(1).ToUnixTimeSeconds(),
             };
+
+            // new version, doesnt work yet
+            string sig = _SignV2Cancellation(cancelOrdersRequest.orderHashes, cancelOrdersRequest.timestamp, salt);
 
             cancelOrdersRequest.signature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelV2SignatureFileLocation, args: new object[] { cancelOrdersRequest.orderHashes, cancelOrdersRequest.salt, cancelOrdersRequest.timestamp, m_PrivateKey, m_ChainId });
 
@@ -756,6 +763,59 @@ namespace Ubiq.SportXAPI
                 decimal amount = Math.Max(amountDecimal / _SXDivisor, 0.000001m);
                 return new Amount(amount, "SX");
             }
+        }
+
+        public class CancelOrderV2SportX
+        {
+            public string Name { get; set; }
+            public string Version { get; set; }
+            public Int32 ChainId { get; set; }
+            public byte[] Salt { get; set; }
+        }
+
+        private string _SignV2Cancellation(string[] orderHashes, Int64 timestamp, byte[] salt)
+        {
+            var cancelOrder = new CancelOrderV2SportX()
+            {
+                Name = "CancelOrderV2SportX",
+                Version = "1.0",
+                ChainId = m_ChainId,
+                Salt = salt,
+            };
+
+            var typedData = new TypedData<CancelOrderV2SportX>
+            {
+                Domain = cancelOrder,
+                Types = new Dictionary<string, MemberDescription[]>
+                {
+                    ["EIP712Domain"] = new[]
+                    {
+                        new MemberDescription {Name = "name", Type = "string"},
+                        new MemberDescription {Name = "version", Type = "string"},
+                        new MemberDescription {Name = "chainId", Type = "uint256"},
+                        new MemberDescription {Name = "salt", Type = "bytes32"},
+                    },
+                    ["Details"] = new[]
+                    {
+                        new MemberDescription {Name = "orderHashes", Type = "string[]"},
+                        new MemberDescription {Name = "timestamp", Type = "uint256"},
+                    },
+                },
+                PrimaryType = "Details",
+                Message = new[]
+                {
+                    new MemberValue
+                    {
+                        TypeName = "Details", Value = new[]
+                        {
+                            new MemberValue { TypeName = "string[]", Value = orderHashes },
+                            new MemberValue { TypeName = "uint256", Value = new BigInteger(timestamp) },
+                        }
+                    },
+                }
+            };
+
+            return Eip712TypedDataSigner.Current.SignTypedData(typedData, new EthECKey(m_PrivateKey));
         }
     }
 }
