@@ -203,8 +203,6 @@ namespace Ubiq.SportXAPI
 
             if (tradeUpdateMessage.bettor == m_WalletAddress)
             {
-                // blank out bettor for our trades
-                tradeUpdateMessage.bettor = null;
                 MyTradeUpdated?.Invoke(this, tradeUpdateMessage);
             }
             else
@@ -460,9 +458,6 @@ namespace Ubiq.SportXAPI
                 {
                     if (trade.bettor == m_WalletAddress)
                     {
-                        // null bettor if its our own trade
-                        trade.bettor = null;
-
                         // ignore bets that have settled more recently than settlement cutoff
                         if (ourBetsSettlementCutoff != null && trade.settleDate != null)
                         {
