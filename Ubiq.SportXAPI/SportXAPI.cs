@@ -619,9 +619,9 @@ namespace Ubiq.SportXAPI
 
         private SignedNewOrder _CreateOrder(PlaceOrder order, string baseTokenAddress)
         {
-            // rounding probability to 3dp = nearest 0.1%
+            // rounding probability to lower 0.25%
             decimal probability = order.Price.ToProbability();
-            decimal probabilityRounded = Math.Round(probability, 3);
+            decimal probabilityRounded = probability.RoundProbabilityDownToQuarter();
             decimal percentageOdds = _OddsMultiplier * probabilityRounded;
             string percentageOddsString = percentageOdds.ToString("F0");
 
