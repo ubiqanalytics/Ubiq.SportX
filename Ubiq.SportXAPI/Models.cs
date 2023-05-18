@@ -273,6 +273,14 @@ namespace Ubiq.SportXAPI
         public decimal? CommissionRate { get; set; }
         public Amount Stake { get; set; }
 
+        public bool Voided
+        {
+            get
+            {
+                return this.tradeStatus == "FAILURE";
+            }
+        }
+
         public DateTime BetDateTime
         {
             get
