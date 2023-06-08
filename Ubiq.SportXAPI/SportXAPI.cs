@@ -8,6 +8,7 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -101,6 +102,7 @@ namespace Ubiq.SportXAPI
             var clientOptions = new ClientOptions
             {
                 AuthUrl = new Uri(m_BaseUrl + "user/token"),
+                AuthHeaders = new Dictionary<string, string> { { "x-api-key", m_ApiKey } },
             };
             var ably = new AblyRealtime(clientOptions);
 
