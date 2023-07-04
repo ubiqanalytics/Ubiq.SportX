@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Numerics;
+using System.Text;
 using Ubiq.Definitions.Market;
 
 namespace Ubiq.SportXAPI
@@ -198,6 +199,49 @@ namespace Ubiq.SportXAPI
         public bool? settled { get; set; }
         public Int32? pageSize { get; set; }
         public string paginationKey { get; set; }
+
+        public string GetParams()
+        {
+            var sb = new StringBuilder($"?rand={Guid.NewGuid().GetHashCode()}");
+            if (startDate != null)
+            {
+                sb.Append($"&startDate={startDate}");
+            }
+            if (endDate != null)
+            {
+                sb.Append($"&endDate={endDate}");
+            }
+            if (marketHashes != null)
+            {
+                sb.Append($"&marketHashes={string.Join(',', marketHashes ?? Array.Empty<string>())}");
+            }
+            if (baseToken != null)
+            {
+                sb.Append($"&baseToken={baseToken}");
+            }
+            if (bettor != null)
+            {
+                sb.Append($"&bettor={bettor}");
+            }
+            if (maker != null)
+            {
+                sb.Append($"&maker={maker}");
+            }
+            if (settled != null)
+            {
+                sb.Append($"&settled={settled}");
+            }
+            if (pageSize != null)
+            {
+                sb.Append($"&pageSize={pageSize}");
+            }
+            if (paginationKey != null)
+            {
+                sb.Append($"&paginationKey={paginationKey}");
+            }
+
+            return sb.ToString();
+        }
     }
 
     public class TradesResponse
@@ -309,6 +353,27 @@ namespace Ubiq.SportXAPI
         public string[] marketHashes { get; set; }
         public string baseToken { get; set; }
         public string maker { get; set; }
+
+        public string GetParams()
+        {
+            var sb = new StringBuilder($"?rand={Guid.NewGuid().GetHashCode()}");
+            if (marketHashes != null)
+            {
+                sb.Append($"&marketHashes={string.Join(',', marketHashes ?? Array.Empty<string>())}");
+            }
+
+            if (baseToken != null)
+            {
+                sb.Append($"&baseToken={baseToken}");
+            }
+
+            if (maker != null)
+            {
+                sb.Append($"&maker={maker}");
+            }
+
+            return sb.ToString();
+        }
     }
 
     public class OrdersResponse

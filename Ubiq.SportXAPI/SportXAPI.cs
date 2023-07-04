@@ -421,7 +421,7 @@ namespace Ubiq.SportXAPI
 
             string settledName = settled.HasValue == true ? settled.Value == true ? "Settled" : "Unsettled" : "Both";
 
-            TradesResponse tradesResponse = await m_HttpClientHelper.PostAsync<TradesResponse, TradesRequest>(m_HttpClient, tradesUrl, tradesRequest, requestName: $"trades_{bettor}_{settledName}", cancellation: cancellation).ConfigureAwait(false);
+            TradesResponse tradesResponse = await m_HttpClientHelper.GetAsync<TradesResponse>(m_HttpClient, tradesUrl + tradesRequest.GetParams(), requestName: $"trades_{bettor}_{settledName}", cancellation: cancellation).ConfigureAwait(false);
 
             if (tradesResponse?.data?.count > tradesResponse?.data.trades?.Length)
             {
@@ -431,7 +431,7 @@ namespace Ubiq.SportXAPI
                 var allTrades = new List<Trade>(tradesResponse.data.trades);
                 while (true)
                 {
-                    TradesResponse pageResponse = await m_HttpClientHelper.PostAsync<TradesResponse, TradesRequest>(m_HttpClient, tradesUrl, tradesRequest, requestName: $"trades_{bettor}_{settledName}", cancellation: cancellation).ConfigureAwait(false);
+                    TradesResponse pageResponse = await m_HttpClientHelper.GetAsync<TradesResponse>(m_HttpClient, tradesUrl + tradesRequest.GetParams(), requestName: $"trades_{bettor}_{settledName}", cancellation: cancellation).ConfigureAwait(false);
                     if (pageResponse?.data?.trades?.Length > 0)
                     {
                         allTrades.AddRange(pageResponse.data.trades);
@@ -532,7 +532,7 @@ namespace Ubiq.SportXAPI
                 marketHashes = marketHashes == null ? null : marketHashes.ToArray(),
             };
 
-            OrdersResponse response = await m_HttpClientHelper.PostAsync<OrdersResponse, OrdersRequest>(m_HttpClient, ordersUrl, ordersRequest, requestName: "orders", cancellation: cancellation).ConfigureAwait(false);
+            OrdersResponse response = await m_HttpClientHelper.GetAsync<OrdersResponse>(m_HttpClient, ordersUrl + ordersRequest.GetParams(), requestName: "orders", cancellation: cancellation).ConfigureAwait(false);
 
             // remove our own trades if requesting others
             if (maker == "other")

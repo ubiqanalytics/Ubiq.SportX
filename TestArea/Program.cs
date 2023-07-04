@@ -9,8 +9,8 @@ using Newtonsoft.Json;
 HttpClient httpClient = HttpUtil.CreateHttpClient(false, false, false);
 var httpClientHelper = new HttpClientHelper(NullLogger<HttpClientHelper>.Instance, new JsonSerializerSettings().Configure());
 
-string privateKey = "<your key>";
-string apiKey = "<your api key>";
+string privateKey = "";
+string apiKey = "";
 
 var sx = new SportXAPI(NullLogger<SportXAPI>.Instance, httpClientHelper, httpClient, new Uri("https://api.sx.bet/"), privateKey, 4.0m, 2.0m, apiKey);
 
@@ -30,23 +30,26 @@ void Sx_OrdersUpdated(object sender, OrderUpdateMessage[] e)
 await sx.Initialise();
 sx.InitialiseWebSocket();
 
-var markets = await sx.GetMarkets(new[] { Sport.Hockey });
+var markets = await sx.GetMarkets(new[] { Sport.Baseball });
+
+var orders = await sx.GetOrders(maker: "other");
+var trades = await sx.GetTrades(bettor: "other", pageSize: 100, from: DateTime.UtcNow.AddDays(-1), to: DateTime.UtcNow);
 
 var moneylineMarkets = markets.data.markets.Where(m => m.MarketType == MarketType.MoneylineIncludingOvertime).ToArray();
 Market marketToBet = moneylineMarkets.OrderByDescending(m => m.StartTime).FirstOrDefault();
 
-NewOrdersResponse result = await sx.PlaceOrders(new[]
-{
-    new PlaceOrder
-    {
-         Amount = new Amount(20m, "USDC"),
-         Expiry = DateTime.UtcNow.AddHours(1),
-         MarketHash = marketToBet.marketHash,
-         Outcome1 = true,
-         Price = new Price(PriceFormat.Decimal, 50m),
-    },
-});
+//NewOrdersResponse result = await sx.PlaceOrders(new[]
+//{
+//    new PlaceOrder
+//    {
+//         Amount = new Amount(20m, "USDC"),
+//         Expiry = DateTime.UtcNow.AddHours(1),
+//         MarketHash = marketToBet.marketHash,
+//         Outcome1 = true,
+//         Price = new Price(PriceFormat.Decimal, 50m),
+//    },
+//});
 
-CancelOrdersV2Response cancelResult = await sx.CancelOrdersV2(result.data.orders);
+//CancelOrdersV2Response cancelResult = await sx.CancelOrdersV2(result.data.orders);
 
 Console.ReadLine();
