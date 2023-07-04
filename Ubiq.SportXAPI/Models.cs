@@ -225,11 +225,11 @@ namespace Ubiq.SportXAPI
             }
             if (maker != null)
             {
-                sb.Append($"&maker={maker}");
+                sb.Append($"&maker={maker.ToString().ToLower()}");
             }
             if (settled != null)
             {
-                sb.Append($"&settled={settled}");
+                sb.Append($"&settled={settled.ToString().ToLower()}");
             }
             if (pageSize != null)
             {
