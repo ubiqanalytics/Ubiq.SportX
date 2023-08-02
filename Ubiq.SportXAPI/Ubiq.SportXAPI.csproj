@@ -14,9 +14,9 @@
   <ItemGroup>
     <PackageReference Include="ably.io" Version="1.2.12" />
     <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
-    <PackageReference Include="Nethereum.Signer.EIP712" Version="4.14.0" />
+    <PackageReference Include="Nethereum.Signer.EIP712" Version="4.15.2" />
     <PackageReference Include="Ubiq.Extensions.Market" Version="1.0.23" />
-    <PackageReference Include="Ubiq.Http" Version="1.0.12" />
+    <PackageReference Include="Ubiq.Http" Version="1.0.13" />
   </ItemGroup>
 
 </Project>
