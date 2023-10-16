@@ -335,7 +335,7 @@ namespace Ubiq.SportXAPI
 
         public async Task<MarketResponse> GetMarkets(Sport[] sports = null, CancellationToken cancellation = default)
         {
-            Int32 pageSize = 50;
+            Int32 pageSize = 40;
 
             string marketsUrl = $"{m_BaseUrl}markets/active?pageSize={pageSize}";
 
