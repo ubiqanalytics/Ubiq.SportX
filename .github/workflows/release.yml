@@ -13,7 +13,7 @@ jobs:
 
     env:
       SOLUTION: 'Ubiq.SportX.sln'
-      VERSION_PREFIX: '1.0.27'
+      VERSION_PREFIX: '2.0.1'
  
     runs-on: windows-latest
 
