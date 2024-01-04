@@ -321,7 +321,7 @@ namespace Ubiq.SportXAPI
         {
             get
             {
-                return this.tradeStatus == "FAILURE";
+                return this.tradeStatus.ToUpper().Contains("FAIL");
             }
         }
 
