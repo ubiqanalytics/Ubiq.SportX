@@ -379,7 +379,7 @@ namespace Ubiq.SportXAPI
             return await m_HttpClientHelper.GetAsync<FixtureResponse>(m_HttpClient, marketsUrl, requestName: $"fixtures_{leagueId}", cancellation: cancellation).ConfigureAwait(false);
         }
 
-        public async Task<TradesResponse> GetTrades(string bettor = "self", bool? settled = null, string[] marketHashes = null, Int32 pageSize = 80, bool? maker = null, DateTime? from = null, DateTime? to = null, string token = null, DateTime? ourBetsSettlementCutoff = null, CancellationToken cancellation = default)
+        public async Task<TradesResponse> GetTrades(string bettor = "self", bool? settled = null, string[] marketHashes = null, Int32 pageSize = 80, bool? maker = null, DateTime? from = null, DateTime? to = null, string token = null, DateTime? ourBetsSettlementCutoff = null, string tradeStatus = null, CancellationToken cancellation = default)
         {
             string baseTokenAddress = null;
             if (token == "USDC")
@@ -417,6 +417,7 @@ namespace Ubiq.SportXAPI
                 maker = maker,
                 startDate = from == null ? null : new DateTimeOffset(from.Value).ToUnixTimeSeconds(),
                 endDate = to == null ? null : new DateTimeOffset(to.Value).ToUnixTimeSeconds(),
+                tradeStatus = tradeStatus,
             };
 
             string settledName = settled.HasValue == true ? settled.Value == true ? "Settled" : "Unsettled" : "Both";

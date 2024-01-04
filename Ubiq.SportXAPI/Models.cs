@@ -199,6 +199,7 @@ namespace Ubiq.SportXAPI
         public bool? settled { get; set; }
         public Int32? pageSize { get; set; }
         public string paginationKey { get; set; }
+        public string tradeStatus { get; set; }
 
         public string GetParams()
         {
@@ -218,6 +219,10 @@ namespace Ubiq.SportXAPI
             if (baseToken != null)
             {
                 sb.Append($"&baseToken={baseToken}");
+            }
+            if (tradeStatus != null)
+            {
+                sb.Append($"&tradeStatus={tradeStatus}");
             }
             if (bettor != null)
             {
