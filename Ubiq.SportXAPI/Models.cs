@@ -292,7 +292,6 @@ namespace Ubiq.SportXAPI
             this.Stake = tradeUpdate.Stake;
         }
 
-        [JsonProperty("_id")]
         public string id { get; set; }
         public string baseToken { get; set; }
         public string bettor { get; set; }
