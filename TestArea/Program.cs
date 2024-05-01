@@ -4,6 +4,7 @@ using Ubiq.SportXAPI;
 using Ubiq.Definitions.Market;
 using Ubiq.Extensions.Newtonsoft;
 using Newtonsoft.Json;
+using Ubiq.Extensions;
 
 
 HttpClient httpClient = HttpUtil.CreateHttpClient(false, false, false);
@@ -16,6 +17,16 @@ var sx = new SportXAPI(NullLogger<SportXAPI>.Instance, httpClientHelper, httpCli
 
 sx.OrdersUpdated += Sx_OrdersUpdated;
 sx.MyTradeUpdated += Sx_MyTradeUpdated;
+sx.MarketsUpdated += Sx_MarketsUpdated;
+
+void Sx_MarketsUpdated(object sender, MarketUpdateMessage[] e)
+{
+    var inactive = e.Where(m => m.status == "INACTIVE").ToArray();
+    if (inactive.Length > 0)
+    {
+        Int32 i = 0;
+    }
+}
 
 void Sx_MyTradeUpdated(object sender, TradeUpdateMessage e)
 {
@@ -30,10 +41,13 @@ void Sx_OrdersUpdated(object sender, OrderUpdateMessage[] e)
 await sx.Initialise();
 sx.InitialiseWebSocket();
 
-var markets = await sx.GetMarkets(new[] { Sport.Baseball });
+var markets = await sx.GetMarkets([Sport.Baseball, Sport.Basketball, Sport.Hockey, Sport.Soccer, Sport.Tennis]);
 
-var orders = await sx.GetOrders(maker: "other");
-var trades = await sx.GetTrades(bettor: "other", pageSize: 100, from: DateTime.UtcNow.AddDays(-1), to: DateTime.UtcNow);
+//var orders = await sx.GetOrders(maker: "other");
+//var trades = await sx.GetTrades(bettor: "other", pageSize: 100, from: DateTime.UtcNow.AddDays(-1), to: DateTime.UtcNow);
+
+var inactive = markets.data.markets.Where(m => m.status == "INACTIVE").ToArray();
+var active = markets.data.markets.Where(m => m.status == "ACTIVE").ToArray();
 
 var moneylineMarkets = markets.data.markets.Where(m => m.MarketType == MarketType.MoneylineIncludingOvertime).ToArray();
 Market marketToBet = moneylineMarkets.OrderByDescending(m => m.StartTime).FirstOrDefault();
