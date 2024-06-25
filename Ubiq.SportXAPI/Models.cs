@@ -33,6 +33,7 @@ namespace Ubiq.SportXAPI
 
     public enum MarketType
     {
+        OneXTwo = 1,
         Moneyline = 52,
         MoneylineIncludingOvertime = 226,
         MoneylineFirstHalf = 63,
