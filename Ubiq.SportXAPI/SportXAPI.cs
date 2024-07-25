@@ -330,7 +330,7 @@ namespace Ubiq.SportXAPI
         public async Task<LeagueTeamsResponse> GetLeagueTeams(Int64 leagueId, CancellationToken cancellation = default)
         {
             string teamsUrl = $"{m_BaseUrl}leagues/teams/{leagueId}";
-            return await m_HttpClientHelper.GetAsync<LeagueTeamsResponse>(m_HttpClient, teamsUrl, requestName: "teams", cancellation: cancellation).ConfigureAwait(false);
+            return await m_HttpClientHelper.GetAsync<LeagueTeamsResponse>(m_HttpClient, teamsUrl, requestName: $"teams_{leagueId}", cancellation: cancellation).ConfigureAwait(false);
         }
 
         public async Task<MarketResponse> GetMarkets(Sport[] sports = null, CancellationToken cancellation = default)
@@ -533,7 +533,7 @@ namespace Ubiq.SportXAPI
                 marketHashes = marketHashes == null ? null : marketHashes.ToArray(),
             };
 
-            OrdersResponse response = await m_HttpClientHelper.GetAsync<OrdersResponse>(m_HttpClient, ordersUrl + ordersRequest.GetParams(), requestName: "orders", cancellation: cancellation).ConfigureAwait(false);
+            OrdersResponse response = await m_HttpClientHelper.GetAsync<OrdersResponse>(m_HttpClient, ordersUrl + ordersRequest.GetParams(), requestName: $"orders_{maker}", cancellation: cancellation).ConfigureAwait(false);
 
             // remove our own trades if requesting others
             if (maker == "other")
@@ -572,7 +572,7 @@ namespace Ubiq.SportXAPI
 
             cancelOrdersRequest.signature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelEventSignatureFileLocation, args: new object[] { cancelOrdersRequest.sportXeventId, cancelOrdersRequest.salt, cancelOrdersRequest.timestamp, m_PrivateKey, m_ChainId });
 
-            return await m_HttpClientHelper.PostAsync<CancelOrdersV2Response, CancelEventOrdersRequest>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: "ordersCancelEvent", cancellation: cancellation).ConfigureAwait(false);
+            return await m_HttpClientHelper.PostAsync<CancelOrdersV2Response, CancelEventOrdersRequest>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: $"ordersCancelEvent_{sportXEventId}", cancellation: cancellation).ConfigureAwait(false);
         }
 
         public async Task<CancelOrdersV2Response> CancelOrdersV2(IEnumerable<string> orderHashes, CancellationToken cancellation = default)
@@ -598,7 +598,7 @@ namespace Ubiq.SportXAPI
 
             cancelOrdersRequest.signature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelV2SignatureFileLocation, args: new object[] { cancelOrdersRequest.orderHashes, cancelOrdersRequest.salt, cancelOrdersRequest.timestamp, m_PrivateKey, m_ChainId });
 
-            return await m_HttpClientHelper.PostAsync<CancelOrdersV2Response, CancelOrdersV2Request>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: "ordersCancel", cancellation: cancellation).ConfigureAwait(false);
+            return await m_HttpClientHelper.PostAsync<CancelOrdersV2Response, CancelOrdersV2Request>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: "ordersCancelV2", cancellation: cancellation).ConfigureAwait(false);
         }
 
         public async Task<CancelOrdersResponse> CancelOrders(IEnumerable<string> orderHashes, CancellationToken cancellation = default)
@@ -693,7 +693,7 @@ namespace Ubiq.SportXAPI
 
             _SignOrder(ordersRequest);
 
-            return await m_HttpClientHelper.PostAsync<NewOrdersResponse, NewOrdersRequest>(m_HttpClient, ordersUrl, ordersRequest, requestName: "ordersCreate", cancellation: cancellation).ConfigureAwait(false);
+            return await m_HttpClientHelper.PostAsync<NewOrdersResponse, NewOrdersRequest>(m_HttpClient, ordersUrl, ordersRequest, requestName: $"ordersCreate_{signedNewOrders.Count()}", cancellation: cancellation).ConfigureAwait(false);
         }
 
         private void _SignOrder(NewOrdersRequest newOrdersRequest)
