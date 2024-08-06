@@ -81,19 +81,45 @@ namespace Ubiq.SportXAPI
         public Makerorderminimums makerOrderMinimums { get; set; }
         public Takerminimums takerMinimums { get; set; }
         public Addresses addresses { get; set; }
-        public bool bettingEnabled { get; set; }
         public decimal totalVolume { get; set; }
         public string domainVersion { get; set; }
         public string EIP712FillHasher { get; set; }
         public string TokenTransferProxy { get; set; }
         public int bridgeFee { get; set; }
+        public int oddsLadderStepSize { get; set; }
+        public decimal depositBridgeFee { get; set; }
+        public int withdrawalBridgeFee { get; set; }
+        public int depositBridgeFeeEthereum { get; set; }
+        public int minimumDepositAmountEthereum { get; set; }
+        public decimal depositBridgeFeeArbitrum { get; set; }
+        public int minimumDepositAmountArbitrum { get; set; }
+        public int withdrawBridgeFeeArbitrum { get; set; }
+        public string cashoutFee { get; set; }
+        public Crosschainfees crosschainFees { get; set; }
+        public int[] popularSports { get; set; }
+        public string chainVersion { get; set; }
     }
 
     public class Oraclefees
     {
-        public string _0xA173954Cc4b1810C0dBdb007522ADbC182DaB380 { get; set; }
-        public string _0xe2aa35C2039Bd0Ff196A6Ef99523CC0D3972ae3e { get; set; }
-        public string _0xaa99bE3356a11eE92c3f099BD7a038399633566f { get; set; }
+        public _0X6629ce1cf35cc1329ebb4f63202f3f197b3f050b _0x6629Ce1Cf35Cc1329ebB4F63202F3f197b3F050B { get; set; }
+        public _0X3e96b0a25d51e3cc89c557f152797c33b839968f _0x3E96B0a25d51e3Cc89C557f152797c33B839968f { get; set; }
+    }
+
+    public class _0X6629ce1cf35cc1329ebb4f63202f3f197b3f050b
+    {
+        public string _0 { get; set; }
+        public string _1 { get; set; }
+        public string _2 { get; set; }
+        public string _3 { get; set; }
+    }
+
+    public class _0X3e96b0a25d51e3cc89c557f152797c33b839968f
+    {
+        public string _0 { get; set; }
+        public string _1 { get; set; }
+        public string _2 { get; set; }
+        public string _3 { get; set; }
     }
 
     public class Sportxaffiliate
@@ -104,29 +130,30 @@ namespace Ubiq.SportXAPI
 
     public class Makerorderminimums
     {
-        public string _0xA173954Cc4b1810C0dBdb007522ADbC182DaB380 { get; set; }
-        public string _0xe2aa35C2039Bd0Ff196A6Ef99523CC0D3972ae3e { get; set; }
-        public string _0xaa99bE3356a11eE92c3f099BD7a038399633566f { get; set; }
+        public string _0x6629Ce1Cf35Cc1329ebB4F63202F3f197b3F050B { get; set; }
+        public string _0x3E96B0a25d51e3Cc89C557f152797c33B839968f { get; set; }
     }
 
     public class Takerminimums
     {
-        public string _0xA173954Cc4b1810C0dBdb007522ADbC182DaB380 { get; set; }
-        public string _0xe2aa35C2039Bd0Ff196A6Ef99523CC0D3972ae3e { get; set; }
-        public string _0xaa99bE3356a11eE92c3f099BD7a038399633566f { get; set; }
+        public string _0x6629Ce1Cf35Cc1329ebB4F63202F3f197b3F050B { get; set; }
+        public string _0x3E96B0a25d51e3Cc89C557f152797c33B839968f { get; set; }
     }
 
     public class Addresses
     {
-        [JsonProperty("416")]
-        public C416 C416 { get; set; }
+        [JsonProperty("4162")]
+        public C4162 C4162 { get; set; }
     }
 
-    public class C416
+    public class C4162
     {
-        public string WETH { get; set; }
         public string USDC { get; set; }
         public string WSX { get; set; }
+    }
+
+    public class Crosschainfees
+    {
     }
 
     public class LeagueResponse
@@ -204,7 +231,7 @@ namespace Ubiq.SportXAPI
 
         public string GetParams()
         {
-            var sb = new StringBuilder($"?rand={Guid.NewGuid().GetHashCode()}");
+            var sb = new StringBuilder();
             if (startDate != null)
             {
                 sb.Append($"&startDate={startDate}");
@@ -362,7 +389,7 @@ namespace Ubiq.SportXAPI
 
         public string GetParams()
         {
-            var sb = new StringBuilder($"?rand={Guid.NewGuid().GetHashCode()}");
+            var sb = new StringBuilder();
             if (marketHashes != null)
             {
                 sb.Append($"&marketHashes={string.Join(',', marketHashes ?? Array.Empty<string>())}");

@@ -8,7 +8,6 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Signer;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
-using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -30,14 +29,12 @@ namespace Ubiq.SportXAPI
 
         private string m_ExecutorAddress;
         private string m_USDCBaseTokenAddress;
-        private string m_ETHBaseTokenAddress;
         private string m_SXBaseTokenAddress;
         private Int32 m_ChainId;
 
-        private static byte[] _Zero = new byte[] { 0 };
+        private static byte[] _Zero = [0];
         private static decimal _OddsMultiplier = (decimal)Math.Pow(10, 20);
         private static decimal _USDCDivisor = 1000000m;
-        private static decimal _ETHDivisor = 1000000000000000000m;
         private static decimal _SXDivisor = 1000000000000000000m;
 
         public const string _CancelAllSignatureFileLocation = "./node_signatures/dist/cancelAllSignature.js";
@@ -80,18 +77,17 @@ namespace Ubiq.SportXAPI
 
         public async Task<MetadataResponse> Initialise(CancellationToken cancellation = default)
         {
-            string metaUrl = $"{m_BaseUrl}metadata";
+            string metaUrl = $"{m_BaseUrl}metadata?chainVersion=SXR";
             MetadataResponse meta = await m_HttpClientHelper.GetAsync<MetadataResponse>(m_HttpClient, metaUrl.ToString(), requestName: "meta", cancellation: cancellation).ConfigureAwait(false);
 
             m_ExecutorAddress = meta.data.executorAddress;
 
-            m_USDCBaseTokenAddress = meta.data.addresses.C416?.USDC;
-            m_ETHBaseTokenAddress = meta.data.addresses.C416?.WETH;
-            m_SXBaseTokenAddress = meta.data.addresses.C416?.WSX;
+            m_USDCBaseTokenAddress = meta.data.addresses.C4162?.USDC;
+            m_SXBaseTokenAddress = meta.data.addresses.C4162?.WSX;
 
-            if (meta.data.addresses.C416 is object)
+            if (meta.data.addresses.C4162 is object)
             {
-                m_ChainId = 416;
+                m_ChainId = 4162;
             }
 
             return meta;
@@ -101,7 +97,7 @@ namespace Ubiq.SportXAPI
         {
             var clientOptions = new ClientOptions
             {
-                AuthUrl = new Uri(m_BaseUrl + "user/token"),
+                AuthUrl = new Uri(m_BaseUrl + "user/token?chainVersion=SXR"),
                 AuthHeaders = new Dictionary<string, string> { { "x-api-key", m_ApiKey } },
             };
             var ably = new AblyRealtime(clientOptions);
@@ -115,7 +111,6 @@ namespace Ubiq.SportXAPI
                     _CreateChannel(ably, "main_line", message => _ProcessLineChangeMessage(message));
                     _CreateChannel(ably, "recent_trades", message => _ProcessTradeUpdateMessage(message));
                     _CreateChannel(ably, $"active_orders:{m_USDCBaseTokenAddress}:{m_WalletAddress}", message => _ProcessOrderMessage(message, m_USDCBaseTokenAddress));
-                    _CreateChannel(ably, $"active_orders:{m_ETHBaseTokenAddress}:{m_WalletAddress}", message => _ProcessOrderMessage(message, m_ETHBaseTokenAddress));
                     _CreateChannel(ably, $"active_orders:{m_SXBaseTokenAddress}:{m_WalletAddress}", message => _ProcessOrderMessage(message, m_SXBaseTokenAddress));
 
                     WebSocketConnected?.Invoke(this, EventArgs.Empty);
@@ -184,10 +179,6 @@ namespace Ubiq.SportXAPI
             {
                 tradeUpdateMessage.Stake = _ConvertCurrencyUSD(tradeUpdateMessage.stake);
             }
-            else if (tradeUpdateMessage.baseToken == m_ETHBaseTokenAddress)
-            {
-                tradeUpdateMessage.Stake = _ConvertCurrencyETH(tradeUpdateMessage.stake);
-            }
             else if (tradeUpdateMessage.baseToken == m_SXBaseTokenAddress)
             {
                 tradeUpdateMessage.Stake = _ConvertCurrencySX(tradeUpdateMessage.stake);
@@ -235,10 +226,6 @@ namespace Ubiq.SportXAPI
                 {
                     currency = "USDC";
                 }
-                else if (baseTokenAddress == m_ETHBaseTokenAddress)
-                {
-                    currency = "ETH";
-                }
                 else if (baseTokenAddress == m_SXBaseTokenAddress)
                 {
                     currency = "SX";
@@ -250,10 +237,6 @@ namespace Ubiq.SportXAPI
                     if (baseTokenAddress == m_USDCBaseTokenAddress)
                     {
                         fillAmount = _ConvertCurrencyUSD(fillAmountString);
-                    }
-                    else if (baseTokenAddress == m_ETHBaseTokenAddress)
-                    {
-                        fillAmount = _ConvertCurrencyETH(fillAmountString);
                     }
                     else if (baseTokenAddress == m_SXBaseTokenAddress)
                     {
@@ -267,10 +250,6 @@ namespace Ubiq.SportXAPI
                     if (baseTokenAddress == m_USDCBaseTokenAddress)
                     {
                         totalBetSize = _ConvertCurrencyUSD(totalBetSizeString);
-                    }
-                    else if (baseTokenAddress == m_ETHBaseTokenAddress)
-                    {
-                        totalBetSize = _ConvertCurrencyETH(totalBetSizeString);
                     }
                     else if (baseTokenAddress == m_SXBaseTokenAddress)
                     {
@@ -337,7 +316,7 @@ namespace Ubiq.SportXAPI
         {
             Int32 pageSize = 40;
 
-            string marketsUrl = $"{m_BaseUrl}markets/active?pageSize={pageSize}";
+            string marketsUrl = $"{m_BaseUrl}markets/active?chainVersion=SXR&pageSize={pageSize}";
 
             if (sports?.Length > 0)
             {
@@ -386,16 +365,12 @@ namespace Ubiq.SportXAPI
             {
                 baseTokenAddress = m_USDCBaseTokenAddress;
             }
-            else if (token == "ETH")
-            {
-                baseTokenAddress = m_ETHBaseTokenAddress;
-            }
             else if (token == "SX")
             {
                 baseTokenAddress = m_SXBaseTokenAddress;
             }
 
-            string tradesUrl = $"{m_BaseUrl}trades";
+            string tradesUrl = $"{m_BaseUrl}trades?chainVersion=SXR";
 
             string bettorAddress = null;
             if (bettor == "self")
@@ -475,10 +450,6 @@ namespace Ubiq.SportXAPI
                     {
                         trade.Stake = _ConvertCurrencyUSD(trade.stake);
                     }
-                    else if (trade.baseToken == m_ETHBaseTokenAddress)
-                    {
-                        trade.Stake = _ConvertCurrencyETH(trade.stake);
-                    }
                     else if (trade.baseToken == m_SXBaseTokenAddress)
                     {
                         trade.Stake = _ConvertCurrencySX(trade.stake);
@@ -516,16 +487,12 @@ namespace Ubiq.SportXAPI
             {
                 baseTokenAddress = m_USDCBaseTokenAddress;
             }
-            else if (token == "ETH")
-            {
-                baseTokenAddress = m_ETHBaseTokenAddress;
-            }
             else if (token == "SX")
             {
                 baseTokenAddress = m_SXBaseTokenAddress;
             }
 
-            string ordersUrl = $"{m_BaseUrl}orders";
+            string ordersUrl = $"{m_BaseUrl}orders?chainVersion=SXR";
             var ordersRequest = new OrdersRequest
             {
                 baseToken = baseTokenAddress,
@@ -546,7 +513,7 @@ namespace Ubiq.SportXAPI
 
         public async Task<CancelAllOrdersResponse> CancelAllOrders(CancellationToken cancellation = default)
         {
-            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/all";
+            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/all?chainVersion=SXR";
             var cancelOrdersRequest = new CancelAllOrdersRequest
             {
                 maker = m_WalletAddress,
@@ -561,7 +528,7 @@ namespace Ubiq.SportXAPI
 
         public async Task<CancelOrdersV2Response> CancelEventOrders(string sportXEventId, CancellationToken cancellation = default)
         {
-            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/event";
+            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/event?chainVersion=SXR";
             var cancelOrdersRequest = new CancelEventOrdersRequest
             {
                 sportXeventId = sportXEventId,
@@ -584,7 +551,7 @@ namespace Ubiq.SportXAPI
 
             byte[] salt = RandomNumberGenerator.GetBytes(32).Concat(_Zero).ToArray();
 
-            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/v2";
+            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel/v2?chainVersion=SXR";
             var cancelOrdersRequest = new CancelOrdersV2Request
             {
                 orderHashes = orderHashes.ToArray(),
@@ -596,28 +563,9 @@ namespace Ubiq.SportXAPI
             // new version, doesnt work yet
             string sig = _SignV2Cancellation(cancelOrdersRequest.orderHashes, cancelOrdersRequest.timestamp, salt);
 
-            cancelOrdersRequest.signature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelV2SignatureFileLocation, args: new object[] { cancelOrdersRequest.orderHashes, cancelOrdersRequest.salt, cancelOrdersRequest.timestamp, m_PrivateKey, m_ChainId });
+            cancelOrdersRequest.signature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelV2SignatureFileLocation, args: [cancelOrdersRequest.orderHashes, cancelOrdersRequest.salt, cancelOrdersRequest.timestamp, m_PrivateKey, m_ChainId]);
 
             return await m_HttpClientHelper.PostAsync<CancelOrdersV2Response, CancelOrdersV2Request>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: "ordersCancelV2", cancellation: cancellation).ConfigureAwait(false);
-        }
-
-        public async Task<CancelOrdersResponse> CancelOrders(IEnumerable<string> orderHashes, CancellationToken cancellation = default)
-        {
-            if (orderHashes == null || orderHashes.Count() == 0)
-            {
-                return CancelOrdersResponse.Success();
-            }
-
-            string cancelOrdersUrl = $"{m_BaseUrl}orders/cancel";
-            var cancelOrdersRequest = new CancelOrdersRequest
-            {
-                orders = orderHashes.ToArray(),
-                message = "Are you sure you want to cancel these orders",
-            };
-
-            cancelOrdersRequest.cancelSignature = await StaticNodeJSService.InvokeFromFileAsync<string>(_CancelSignatureFileLocation, args: new object[] { cancelOrdersRequest.orders, m_PrivateKey, m_ChainId });
-
-            return await m_HttpClientHelper.PostAsync<CancelOrdersResponse, CancelOrdersRequest>(m_HttpClient, cancelOrdersUrl, cancelOrdersRequest, requestName: "ordersCancel", cancellation: cancellation).ConfigureAwait(false);
         }
 
         private SignedNewOrder _CreateOrder(PlaceOrder order, string baseTokenAddress)
@@ -657,12 +605,6 @@ namespace Ubiq.SportXAPI
                     betSize = bigInt.ToString();
                     baseTokenAddress = m_USDCBaseTokenAddress;
                 }
-                else if (order.Amount.Currency == "ETH")
-                {
-                    var bigInt = new BigInteger(order.Amount.Value * _ETHDivisor);
-                    betSize = bigInt.ToString();
-                    baseTokenAddress = m_ETHBaseTokenAddress;
-                }
                 else if (order.Amount.Currency == "SX")
                 {
                     var bigInt = new BigInteger(order.Amount.Value * _SXDivisor);
@@ -684,7 +626,7 @@ namespace Ubiq.SportXAPI
 
         public async Task<NewOrdersResponse> _PlaceOrders(IEnumerable<SignedNewOrder> signedNewOrders, CancellationToken cancellation = default)
         {
-            string ordersUrl = $"{m_BaseUrl}orders/new";
+            string ordersUrl = $"{m_BaseUrl}orders/new?chainVersion=SXR";
 
             var ordersRequest = new NewOrdersRequest
             {
@@ -730,21 +672,6 @@ namespace Ubiq.SportXAPI
                 // if not 0, round up to something reasonable
                 decimal amount = Math.Max(amountDecimal / _USDCDivisor, 0.001m);
                 return new Amount(amount, "USDC");
-            }
-        }
-
-        private Amount _ConvertCurrencyETH(string amountString)
-        {
-            decimal amountDecimal = decimal.Parse(amountString);
-            if (amountDecimal == 0)
-            {
-                return new Amount(0, "ETH");
-            }
-            else
-            {
-                // if not 0, round up to something reasonable
-                decimal amount = Math.Max(amountDecimal / _ETHDivisor, 0.000001m);
-                return new Amount(amount, "ETH");
             }
         }
 

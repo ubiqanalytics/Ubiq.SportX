@@ -52,18 +52,18 @@ var active = markets.data.markets.Where(m => m.status == "ACTIVE").ToArray();
 var moneylineMarkets = markets.data.markets.Where(m => m.MarketType == MarketType.MoneylineIncludingOvertime).ToArray();
 Market marketToBet = moneylineMarkets.OrderByDescending(m => m.StartTime).FirstOrDefault();
 
-//NewOrdersResponse result = await sx.PlaceOrders(new[]
-//{
-//    new PlaceOrder
-//    {
-//         Amount = new Amount(20m, "USDC"),
-//         Expiry = DateTime.UtcNow.AddHours(1),
-//         MarketHash = marketToBet.marketHash,
-//         Outcome1 = true,
-//         Price = new Price(PriceFormat.Decimal, 50m),
-//    },
-//});
+NewOrdersResponse result = await sx.PlaceOrders(new[]
+{
+    new PlaceOrder
+    {
+         Amount = new Amount(15m, "USDC"),
+         Expiry = DateTime.UtcNow.AddHours(1),
+         MarketHash = marketToBet.marketHash,
+         Outcome1 = true,
+         Price = new Price(PriceFormat.Decimal, 50m),
+    },
+});
 
-//CancelOrdersV2Response cancelResult = await sx.CancelOrdersV2(result.data.orders);
+CancelOrdersV2Response cancelResult = await sx.CancelOrdersV2(result.data.orders);
 
 Console.ReadLine();
