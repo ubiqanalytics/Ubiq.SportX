@@ -17,6 +17,13 @@ var sx = new SportXAPI(NullLogger<SportXAPI>.Instance, httpClientHelper, httpCli
 
 sx.OrdersUpdated += Sx_OrdersUpdated;
 sx.MyTradeUpdated += Sx_MyTradeUpdated;
+sx.TradeUpdated += Sx_TradeUpdated;
+
+void Sx_TradeUpdated(object sender, TradeUpdateMessage e)
+{
+    Console.WriteLine(JsonConvert.SerializeObject(e, Formatting.Indented));
+}
+
 sx.MarketsUpdated += Sx_MarketsUpdated;
 
 void Sx_MarketsUpdated(object sender, MarketUpdateMessage[] e)
@@ -26,6 +33,7 @@ void Sx_MarketsUpdated(object sender, MarketUpdateMessage[] e)
     {
         Int32 i = 0;
     }
+    Console.WriteLine(JsonConvert.SerializeObject(e, Formatting.Indented));
 }
 
 void Sx_MyTradeUpdated(object sender, TradeUpdateMessage e)
@@ -42,6 +50,8 @@ await sx.Initialise();
 sx.InitialiseWebSocket();
 
 var markets = await sx.GetMarkets([Sport.Baseball, Sport.Basketball, Sport.Hockey, Sport.Soccer, Sport.Tennis]);
+
+Console.ReadLine();
 
 //var orders = await sx.GetOrders(maker: "other");
 //var trades = await sx.GetTrades(bettor: "other", pageSize: 100, from: DateTime.UtcNow.AddDays(-1), to: DateTime.UtcNow);
